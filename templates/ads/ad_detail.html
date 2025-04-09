@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Редактировать объявление{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Блок с изображениями занимает всю ширину на мобильных и 6 колонок на md и выше -->
+        <div class="col-12 col-md-6 order-1">
+            {% if ad.images.all %}
+            <!-- Блок для мобильных устройств -->
+            <div class="d-block d-md-none">
+                <div id="mobileCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for image in ad.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ image.image.url|default:image.image }}" class="d-block w-100" alt="Изображение автомобиля">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#mobileCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Назад</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#mobileCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Вперёд</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Блок для десктопа -->
+            <div class="d-none d-md-block">
+                <div class="car-gallery">
+                    <!-- Главный снимок -->
+                    <div class="main-image">
+                        {% if ad.images.first.image.url %}
+                        <img id="mainImage" src="{{ ad.images.first.image.url }}" alt="Основное изображение" class="img-fluid">
+                        {% elif ad.images.first.image %}
+                        <img id="mainImage" src="{{ ad.images.first.image }}" alt="Основное изображение" class="img-fluid">
+                        {% endif %}
+                    </div>
+                    <!-- Ряд миниатюр -->
+                    <div class="thumbnail-row d-flex flex-wrap justify-content-center mt-2">
+                        {% for image in ad.images.all %}
+                        <img class="thumbnail img-thumbnail mx-1" src="{{ image.image.url|default:image.image }}"
+                             data-full="{{ image.image.url|default:image.image }}" alt="Миниатюра"
+                             style="width: 100px; cursor: pointer;">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p>Нет изображения</p>
+            {% endif %}
+        </div>
+
+        <!-- Блок с текстом объявления -->
+        <div class="col-12 col-md-6 order-2">
+            <h1>{{ ad.mark_names }} {{ ad.model }}</h1>
+            <p>Год: {{ ad.year }}</p>
+            <p>Цена: {{ ad.price }} ₽</p>
+            <p>Пробег: {{ ad.mileage }} км.</p>
+            <p>{{ ad.description }}</p>
+            {% if ad.source == "web" %}
+            <p>
+              <a href="tel:{{ ad.owner.profile.contact_number|default:'Номер не указан' }}">
+                {{ ad.owner.profile.contact_number|default:"Номер не указан" }}
+              </a>
+               - {{ ad.owner.profile.user.username }}
+            </p>
+            {% elif ad.source == "telegram" %}
+            <p><a href="{{ ad.link }}">{{ ad.link }}</a></p>
+                 <a href="tel:{{ ad.contact_number|default:'Номер не указан' }}">
+                {{ ad.contact_number|default:"Номер не указан" }}
+              </a>
+            <p></p>
+            {% endif %}
+            <p class="fw-lighter fs-6">{{ ad.created_at|date:"j F Y г." }}</p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<style>
+    .main-image {
+    height: 350px; /* Фиксированная высота */
+    overflow: hidden; /* Обрезка излишков */
+}
+.main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #f8f9fa; /* Цвет фона для пустых областей */
+}
+
+
+
+
+    .car-gallery .main-image img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+}
+.thumbnail {
+
+    transition: transform 0.3s;
+}
+.thumbnail:hover {
+    transform: scale(1.1);
+}
+
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.slim.js"
+        integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
+
+<script>
+    // Используем jQuery для удобства
+$(document).ready(function(){
+    // При клике на миниатюру меняем главный снимок
+    $('.thumbnail').on('click', function(){
+        var fullImageUrl = $(this).data('full');
+         console.log ("HI HI HI")
+        console.log (fullImageUrl)
+        $('#mainImage').attr('src', fullImageUrl);
+        // Можно добавить активный класс для выделения миниатюры
+        $('.thumbnail').removeClass('active');
+        $(this).addClass('active');
+    });
+
+<!--    // При клике на главный снимок открываем модальное окно (если нужно)-->
+<!--    $('#mainImage').on('click', function(){-->
+<!--        $('#imageModal').modal('show');-->
+<!--        $('#modalImage').attr('src', $(this).attr('src'));-->
+<!--    });-->
+});
+
+</script>
+
+
+{% endblock %}

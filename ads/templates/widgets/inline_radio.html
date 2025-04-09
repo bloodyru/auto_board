@@ -1,0 +1,98 @@
+<div class="color-select">
+  {% for group, options, index in widget.optgroups %}
+    {% for option in options %}
+      <input type="radio"
+             class="color-input"
+             name="{{ widget.name }}"
+             value="{{ option.value }}"
+             id="{{ option.attrs.id }}"
+             data-label="{{ option.label }}"
+             {% if option.selected %}checked{% endif %}
+             style="display: none;"
+             {% include "django/forms/widgets/attrs.html" %}>
+
+      <label for="{{ option.attrs.id }}"
+             class="color-option"
+             style="background-color: {{ option.value }}"></label>
+    {% endfor %}
+  {% endfor %}
+</div>
+
+<div id="selected-color-label" class="mt-2 text-muted fw-semibold"></div>
+
+
+<style>
+    .no-image-placeholder {
+    background-color: #f8f9fa;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    border-right: 1px solid #dee2e6;
+}
+
+
+
+/* Виджет выбора цвета */
+/* Скрываем только чекбоксы внутри .color-select */
+
+.color-select input[type="radio"] {
+    display: none;
+}
+
+.color-select label {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: 2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.color-select input[type="radio"]:checked + label {
+    border-color: black;
+}
+
+/* Белая граница для черного цвета */
+.color-option[style*="background-color: black"] {
+    border: 2px solid #ccc;
+}
+
+.color-option[style*="background-color: black"]:hover,
+input[type="radio"]:checked + .color-option[style*="background-color: black"] {
+    border: 2px solid white;
+}
+
+/* Серая граница для белого цвета */
+.color-option[style*="background-color: white"] {
+    border: 2px solid #999;
+}
+
+input[type="radio"]:checked + .color-option {
+    box-shadow: 0 0 0 2px #000;
+}
+
+
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const radios = document.querySelectorAll(".color-input");
+    const labelDisplay = document.getElementById("selected-color-label");
+
+    function updateLabel() {
+      const selected = document.querySelector(".color-input:checked");
+      if (selected) {
+        labelDisplay.textContent = selected.dataset.label;
+      }
+    }
+
+    // Обновляем при загрузке (если что-то уже выбрано)
+    updateLabel();
+
+    radios.forEach(radio => {
+      radio.addEventListener("change", updateLabel);
+    });
+  });
+</script>

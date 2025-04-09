@@ -1,0 +1,7 @@
+{% for ad in ads %}
+    <div>
+        <h2><a href="{% url 'ad_detail' ad_id=ad.id %}">{{ ad.brand }} {{ ad.model }}</a></h2>
+        <p>Цена: {{ ad.price }}₽ | Пробег: {{ ad.mileage }} км</p>
+        <img src="{{ ad.image.url }}" width="150">
+    </div>
+{% endfor %}

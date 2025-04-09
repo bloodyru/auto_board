@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Результаты поиска: "{{ query }}"</h2>
+
+<form method="GET" action="{% url 'search_ads' %}">
+    <input type="text" name="q" placeholder="Поиск..." value="{{ query }}">
+    <button type="submit">Искать</button>
+</form>
+
+{% if results %}
+    <ul>
+        {% for ad in results %}
+            <li>{{ ad.mark_name }} {{ ad.model_name }} ({{ ad.country }})</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Ничего не найдено.</p>
+{% endif %}
+{% endblock %}

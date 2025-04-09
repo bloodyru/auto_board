@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Редактировать объявление{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Редактировать объявление</h2>
+
+    <!-- Вывод ошибок -->
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Пожалуйста, исправьте ошибки в форме:</strong>
+        <ul>
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li><strong>{{ field }}:</strong> {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Вывод сообщений -->
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <h5>Загруженные изображения:</h5>
+        <div class="">
+            {% for image in ad.images.all %}
+            <div class="col-md-3 position-relative image-container">
+               <p> <img src="{{ image.image.url }}" class="img-thumbnail"> </p>
+                <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="{{ image.id }}">✖</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <label for="images">Загрузите дополнительные изображения (до 10 файлов):</label>
+        <input type="file" name="images" id="images" multiple accept="image/*" class="form-control">
+
+        <button type="submit" class="btn btn-primary mt-3">Сохранить изменения</button>
+    </form>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const brandSelect = document.getElementById("id_mark_name");
+    const modelSelect = document.getElementById("id_model_name");
+
+    function loadModels(brand) {
+        modelSelect.innerHTML = "<option value=''>Выберите модель</option>";
+
+        if (brand) {
+            fetch(`/get_models/?brand=${brand}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.models.forEach(model => {
+                        const option = document.createElement("option");
+                        option.value = model;
+                        option.textContent = model;
+                        modelSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Ошибка загрузки моделей:", error));
+        }
+    }
+
+    // При изменении марки авто загружаем модели
+    brandSelect.addEventListener("change", function () {
+        loadModels(brandSelect.value);
+    });
+
+
+});
+
+    <!-- JavaScript для удаления изображений -->
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".delete-image").forEach(button => {
+        button.addEventListener("click", function () {
+            const imageId = this.dataset.imageId;
+            const imageContainer = this.parentElement;
+
+            fetch(`/delete-image/${imageId}/`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    imageContainer.remove();
+                } else {
+                    alert("Ошибка при удалении изображения");
+                }
+            })
+            .catch(error => console.error("Ошибка:", error));
+        });
+    });
+});
+</script>
+
+<style>
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.delete-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 30px; /* Увеличенный размер для удобства */
+    height: 30px;
+    font-size: 18px; /* Достаточно большой символ ✖ */
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+{% block title %}Главная - AutoBoard{% endblock %}
+
+{% block content %}
+<!-- Подключение jQuery (если не подключен) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Подключение Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+
+
+<div class="container mt-5">
+    <form method="GET" action="{% url 'home' %}">
+        <div class="row g-1">
+            <!--        СЕЛЕКТ2-->
+            <div class="col-md-3">
+                <select id="brand-select" class="form-select js-example-basic-single" name="brand"
+                        data-placeholder="Любая марка">
+                    <option value=""></option>
+                    {% for mark in marks %}
+                    <option value="{{ mark.mark_name }}" {% if mark.mark_name == request.GET.brand %}selected{% endif %}>
+                        {{mark.mark_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!--        конец СЕЛЕКТ2-->
+            <!--Select модели-->
+            <div class="col-md-3">
+                <select id="model-select" name="model" class="form-select">
+                    <option value="">Любая модель</option>
+                </select>
+            </div>
+            <!--Select поколения-->
+            <div class="col-md-3">
+                <select id="generation-select" name="generation" class="form-select js-load-generations">
+                    <option value="">Поколение</option>
+                </select>
+            </div>
+            <!--        Группа выбора годов выпуска-->
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="number" name="price_low" class="form-control" placeholder="Цена от"
+                           value="{{ request.GET.price_low }}">
+                    <input type="number" name="price_max" class="form-control" placeholder="Цена до"
+                           value="{{ request.GET.price_max }}">
+                </div>
+            </div>
+        </div>
+        <!-- Область расширенного поиска (скрыта по умолчанию) -->
+        <div class="collapse  row g-1" id="advancedSearch">
+            <!--            <div class="card card-body">-->
+            <div class="row g-1">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="number" name="year_low" class="form-control" placeholder="Год от"
+                               value="{{ request.GET.year_low }}">
+                        <input type="number" name="year_max" class="form-control" placeholder="Год до"
+                               value="{{ request.GET.year_max }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="fuel_type" id="fuel-type" class="form-select">
+                        <option value="">Любое топливо</option>
+                        <option value="petrol" {% if request.GET.fuel_type == "petrol" %}selected{% endif %}>Бензин</option>
+                        <option value="diesel" {% if request.GET.fuel_type == "diesel" %}selected{% endif %}>Дизель</option>
+                        <option value="gas" {% if request.GET.fuel_type == "gas" %}selected{% endif %}>Газ</option>
+                        <option value="electric" {% if request.GET.fuel_type == "electric" %}selected{% endif %}>Электро</option>
+                        <option value="hybrid" {% if request.GET.fuel_type == "hybrid" %}selected{% endif %}>Гибрид</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <!--                <label for="transmission" class="form-label">КПП</label>-->
+                    <select id="gearbox" name="gearbox" class="form-select">
+                        <option value="">Любая КПП</option>
+                        <option value="machanical" {% if request.GET.gearbox == "machanical" %}selected{% endif %}>Механика</option>
+                        <option value="automatic" {% if request.GET.gearbox == "automatic" %}selected{% endif %}>Автомат</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="body-type" name="body_type" class="form-select">
+                        <option value="">Любой кузов</option>
+                        <option value="sedan" {% if request.GET.body_type == "sedan" %}selected{% endif %}>Седан</option>
+                        <option value="hatchback" {% if request.GET.body_type == "hatchback" %}selected{% endif %}>Хэтчбек</option>
+                        <option value="suv" {% if request.GET.body_type == "suv" %}selected{% endif %}>Внедорожник</option>
+                        <option value="station_wagon" {% if request.GET.body_type == "station_wagon" %}selected{% endif %}>Универсал</option>
+                        <option value="minivan" {% if request.GET.body_type == "minivan" %}selected{% endif %}>Минивэн</option>
+                        <option value="pickup" {% if request.GET.body_type == "pickup" %}selected{% endif %}>Пикап</option>
+                        <option value="limousine" {% if request.GET.body_type == "limousine" %}selected{% endif %}>Лимузин</option>
+                        <option value="van" {% if request.GET.body_type == "van" %}selected{% endif %}>Фургон</option>
+                        <option value="convertible" {% if request.GET.body_type == "convertible" %}selected{% endif %}>Кабриолет</option>
+                    </select>
+                </div>
+                </div>
+            <div class="row g-1">
+                  <div class="col-md-3">
+                    <select id="drive" name="drive" class="form-select">
+                            <option value="">Привод</option>
+                            <option value="front" {% if request.GET.drive == "front" %}selected{% endif %}>Передний</option>
+                            <option value="rear" {% if request.GET.drive == "rear" %}selected{% endif %}>Задний</option>
+                            <option value="4x4" {% if request.GET.drive == "4x4" %}selected{% endif %}>Полный</option>
+                        </select>
+                  </div>
+                 <div class="col-md-3">
+                    <div class="input-group">
+                    <input type="number" name="mileage_low" class="form-control" placeholder="Пробег от"
+                    value="{{ request.GET.mileage_low }}">
+                    <input type="number" name="mileage_max" class="form-control" placeholder="Пробег до"
+                    value="{{ request.GET.mileage_max }}">
+                    </div>
+                 </div>
+                <div class="col-md-3">
+                    <div class="btn-group " role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check" value="" name="seller" id="sellernone" autocomplete="off" {% if request.GET.seller == "" %}checked{% endif %} >
+                        <label class="btn btn-outline-secondary fs-10" for="sellernone">Любой</label>
+
+                        <input type="radio" class="btn-check" value="private" name="seller" id="seller_private" autocomplete="off" {% if request.GET.seller == "private" %}checked{% endif %}>
+                        <label class="btn btn-outline-secondary" for="seller_private">Частник</label>
+
+                        <input type="radio" class="btn-check" value="company" name="seller" id="seller_company" autocomplete="off" {% if request.GET.seller == "company" %}checked{% endif %}>
+                        <label class="btn btn-outline-secondary" for="seller_company">Компания</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+<!--                    <label>Цвет:</label>-->
+                    <div class="color-select">
+                        {% for value, label in COLOR_CHOICES %}
+                            <input type="checkbox" name="color" id="color_{{ forloop.counter }}" value="{{ value }}"
+                                   {% if request.GET.color == value %}checked{% endif %} title="{{ label }}">
+                            <label class="color-option" for="color_{{ forloop.counter }}" style="background-color: {{ value }};" title="{{ label }}"></label>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="row g-1">
+                <div class="col-md-3">
+                    <select id="location" name="location" class="form-select">
+                        <option value="">Наличие</option>
+                        <option value="in_stock" {% if request.GET.location == "in_stock" %}selected{% endif %}>В наличии</option>
+                        <option value="in_transit" {% if request.GET.location == "in_transit" %}selected{% endif %}>В пути</option>
+                        <option value="on_order" {% if request.GET.location == "on_order" %}selected{% endif %}>Под заказ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="damaged" name="damaged" class="form-select">
+                        <option value="">Повреждения</option>
+                        <option value="ok" {% if request.GET.damaged == "ok" %}selected{% endif %}>Целая/На ходу</option>
+                        <option value="damaged" {% if request.GET.damaged == "damaged" %}selected{% endif %}>Битая/Не на ходу</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="steering" name="steering" class="form-select">
+                        <option value="">Руль</option>
+                        <option value="left" {% if request.GET.steering == "left" %}selected{% endif %}>Левый</option>
+                        <option value="right" {% if request.GET.steering == "right" %}selected{% endif %}>Правый</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                     <select id="country" name="country" class="form-select">
+                        <option value="">Страна</option>
+                     {% for value, label in COUNTRY_CHOICES %}
+                        <option value="{{ value }}" {% if request.GET.country == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-1">
+                <div class="col-md-3">
+                    <select id="documents" name="documents" class="form-select">
+                        <option value="">Документы</option>
+                        <option value="ok" {% if request.GET.documents == "ok" %}selected{% endif %}>В порядке</option>
+                        <option value="bad" {% if request.GET.documents == "bad" %}selected{% endif %}>Нет/проблемные</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check form-check-inline">
+                      <input type="checkbox" name="exchange" id="exchange" class="form-check-input"
+                             {% if request.GET.exchange == "on" %}checked{% endif %}>
+                      <label class="form-check-label" for="exchange">Обмен</label>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row mt-2">
+            <div class="col-6 text-end">
+                <button type="submit" class="btn btn-primary">Найти авто</button>
+            </div>
+            <!-- Кнопка для раскрытия расширенного поиска -->
+            <div class="text-end mb-3 col-6">
+    <span id="toggleAdvancedSearch" style="cursor: pointer;"
+          data-bs-toggle="collapse" data-bs-target="#advancedSearch"
+          aria-expanded="false" aria-controls="advancedSearch">
+        Расширенный поиск
+                <span id="filter-counter" style="display: none; margin-left: 5px;"
+              class="badge bg-primary rounded-pill"></span>
+    </span>
+            </div>
+
+        </div>
+
+
+    </form>
+
+
+<!--    <h2 class="mt-5">Популярные объявления</h2>-->
+    <div class="row mt-2">
+        {% if combined_ads %}
+        {% for ad in combined_ads %}
+        <div class="col-md-12 mb-1">
+
+            <a class="text-decoration-none" href="{% url 'ad_detail' ad.source ad.id %}">
+
+                <div class="card shadow-sm my-hover-div">
+                    <div class="row g-0">
+                        {% if ad.images.all %}
+                        <div class="col-md-3">
+                            <div id="carousel{{ ad.id }}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner m-1">
+                                    {% for image in ad.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image.url|default:image.image }} "
+                                             class="d-block w-100 card-img-top"
+                                             alt="{{ ad.mark_names }} {{ ad.model }}">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <button class="carousel-control-prev" type="button"
+                                        data-bs-target="#carousel{{ ad.id }}"
+                                        data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button"
+                                        data-bs-target="#carousel{{ ad.id }}"
+                                        data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-md-3 d-flex align-items-center justify-content-center">
+                            <div class="text-center p-3">
+                                <i class="bi bi-image" style="font-size: 3rem; color: #6c757d;"></i>
+                                <p class="text-muted">Нет фотографий</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-7">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ ad.mark_names }} {{ ad.model }}, {{ ad.year }}</h5>
+                                <div class="description-text">
+                                    {{ ad.description|truncatechars:250 }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 p-2 d-flex flex-column">
+                            <p class="card-text fw-bold">{{ ad.price }} ₽</p>
+                            <p class="card-text fw-lighter fs-6 mt-auto">{{ ad.created_at|date:"j F Y г." }}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {% endfor %}
+        {% else %}
+        <p>Объявлений не найдено.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Добавляем кастомный CSS, чтобы Select2 выглядел как стандартный Bootstrap -->
+<style>
+    .no-image-placeholder {
+    background-color: #f8f9fa;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    border-right: 1px solid #dee2e6;
+}
+
+
+
+/* Виджет выбора цвета */
+/* Скрываем только чекбоксы внутри .color-select */
+
+.color-select input[type="checkbox"] {
+    display: none;
+}
+
+.color-select label {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: 2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.color-select input[type="checkbox"]:checked + label {
+    border-color: black;
+}
+
+/* Белая граница для черного цвета */
+.color-option[style*="background-color: black"] {
+    border: 2px solid #ccc;
+}
+
+.color-option[style*="background-color: black"]:hover,
+input[type="checkbox"]:checked + .color-option[style*="background-color: black"] {
+    border: 2px solid white;
+}
+
+/* Серая граница для белого цвета */
+.color-option[style*="background-color: white"] {
+    border: 2px solid #999;
+}
+
+input[type="checkbox"]:checked + .color-option {
+    box-shadow: 0 0 0 2px #000;
+}
+
+    --------------------
+
+
+
+      #filter-counter {
+        font-size: 0.8em;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+    #toggleAdvancedSearch {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .my-hover-div:hover {
+  background-color: #f8f9fa; /* или другой цвет */
+}
+
+.carousel-item {
+width:97%;
+}
+
+    .description-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+    @media (max-width: 768px) {
+  .description-text {
+    -webkit-line-clamp: 2;     /* На мобильных ограничиваем до 2 строк */
+  }
+}
+
+    .card {
+display: flex;
+flex-direction: column;
+height: 100%; /* Устанавливаем одинаковую высоту для всех карточек */
+}
+
+.card-body {
+flex-grow: 1; /* Растягивает блок с текстом до одинаковой высоты */
+display: flex;
+flex-direction: column;
+justify-content: space-between; /* Распределяет элементы равномерно */
+}
+
+
+    .card-img-top {
+    width: 100%;  /* Растягиваем изображение по ширине */
+    height: 200px; /* Фиксированная высота для всех изображений */
+    object-fit: cover; /* Обрезаем изображение, сохраняя пропорции */
+    border-radius: 5px; /* Небольшое скругление углов */
+    background-color: #f8f9fa; /* Фон, если изображение меньше заданного размера */
+    display: block;
+}
+
+
+
+/* Делаем так, чтобы Select2 выглядел как стандартный Bootstrap */
+.select2-container .select2-selection--single {
+height: calc(2.25rem + 2px); /* Высота как у Bootstrap */
+padding: 0.375rem 0.75rem; /* Внутренние отступы */
+font-size: 1rem; /* Размер шрифта */
+line-height: 1.5;
+color: #212529;
+background-color: #fff;
+border: 1px solid #ced4da;
+border-radius: 0.375rem; /* Скругление углов */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+line-height: 1.5;
+padding-left: 0;
+color: #495057;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+height: calc(2.25rem + 2px);
+right: 5px;
+}
+
+/* Стили для выпадающего списка */
+.select2-dropdown {
+border-radius: 0.375rem;
+border: 1px solid #ced4da;
+}
+
+.select2-results__option {
+padding: 0.5rem;
+font-size: 1rem;
+}
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const brandSelect = document.getElementById("brand-select");
+        const modelSelect = document.getElementById("model-select");
+        const generationSelect = document.getElementById("generation-select");
+
+        const selectedModel = "{{ request.GET.model|escapejs }}";
+        const selectedGeneration = "{{ request.GET.generation|escapejs }}";
+
+        // Инициализация Select2
+        $(brandSelect).select2({
+            placeholder: "Любая марка",
+            allowClear: true,
+            width: "100%"
+        });
+
+        // Загрузка моделей по марке
+        function loadModels(brand, selectedModel = null) {
+            modelSelect.innerHTML = "<option value=''>Любая модель</option>";
+
+            if (!brand) return;
+
+            fetch(`/get_models/?brand=${encodeURIComponent(brand)}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.models.forEach(model => {
+                        const option = document.createElement("option");
+                        option.value = model;
+                        option.textContent = model;
+                        if (selectedModel && selectedModel === model) {
+                            option.selected = true;
+                        }
+                        modelSelect.appendChild(option);
+                    });
+
+                    // Если модель выбрана — загружаем поколения
+                    if (selectedModel) {
+                        loadGenerations(brand, selectedModel, selectedGeneration);
+                    }
+                })
+                .catch(err => console.error("Ошибка загрузки моделей:", err));
+        }
+
+        // Загрузка поколений по марке и модели
+        function loadGenerations(mark, model, selectedGeneration = null) {
+            generationSelect.innerHTML = "<option value=''>Поколение</option>";
+
+            if (!mark || !model) return;
+
+            fetch(`/get_generations/?mark=${encodeURIComponent(mark)}&model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.generations || data.generations.length === 0) return;
+
+                    data.generations.forEach(gen => {
+                        const option = document.createElement("option");
+                        option.value = gen;
+                        option.textContent = gen;
+                        if (selectedGeneration && selectedGeneration === gen) {
+                            option.selected = true;
+                        }
+                        generationSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.error("Ошибка загрузки поколений:", err));
+        }
+
+        // Автоматическая загрузка при загрузке страницы (если уже есть марка)
+        if (brandSelect.value) {
+            loadModels(brandSelect.value, selectedModel);
+        }
+
+        // Обработка выбора марки
+        $(brandSelect).on("select2:select", function () {
+            modelSelect.innerHTML = "<option value=''>Любая модель</option>";
+            generationSelect.innerHTML = "<option value=''>Поколение</option>";
+            loadModels(brandSelect.value);
+        });
+
+        // Обработка выбора модели
+        modelSelect.addEventListener("change", function () {
+            generationSelect.innerHTML = "<option value=''>Поколение</option>";
+            loadGenerations(brandSelect.value, modelSelect.value);
+        });
+
+        ///Счетчик условий расширенного поиска
+
+
+    // Функция для подсчета активных фильтров
+    function countActiveFilters() {
+        let count = 0;
+
+        // Проверяем каждый фильтр
+        if ($('#advancedSearch input[name="year_low"]').val() || $('#advancedSearch input[name="year_max"]').val()) count++;
+        if ($('#fuel-type').val()) count++;
+        if ($('#gearbox').val()) count++;
+        if ($('#body-type').val()) count++;
+        if ($('#drive').val()) count++;
+        if ($('#advancedSearch input[name="mileage_low"]').val() || $('#advancedSearch input[name="mileage_max"]').val()) count++;
+        if ($('#seller_private').is(':checked')) count++;
+        if ($('#seller_company').is(':checked')) count++;
+        if ($('#exchange').is(':checked')) count++;
+        if ($('#location').val()) count++;
+        if ($('#damaged').val()) count++;
+        if ($('#steering').val()) count++;
+        if ($('input[name="color"]:checked').length > 0) count++;
+        if ($('#documents').val()) count++;
+        if ($('#country').val()) count++;
+        return count;
+    }
+
+    // Обновляем счетчик при изменении фильтров
+    function updateFilterCounter() {
+        const count = countActiveFilters();
+        const counterElement = $('#filter-counter');
+
+        if (count > 0) {
+            counterElement.text(`+${count}`).show();
+        } else {
+            counterElement.hide();
+        }
+    }
+
+    // Инициализация счетчика
+    updateFilterCounter();
+
+    // Обработчики событий для всех фильтров
+    $('#advancedSearch input, #advancedSearch select').on('change', function() {
+        updateFilterCounter();
+    });
+
+    // Обработчик для кнопки "Расширенный поиск"
+    $('#toggleAdvancedSearch').click(function() {
+        // Небольшая задержка для анимации collapse
+        setTimeout(updateFilterCounter, 350);
+    });
+
+
+
+
+    });
+
+
+
+</script>
+
+
+{% endblock %}
